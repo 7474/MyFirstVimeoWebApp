@@ -1,0 +1,38 @@
+﻿@{
+    ViewData["Title"] = "VideoCreate";
+}
+
+<div>
+    <input type="file" id="upload-file-select" />
+</div>
+<div id="upload-form">
+
+</div>
+
+@section Scripts{
+    <script>
+    $(function () {
+        let getUploadForm = function(size) {
+            $.ajax({
+                type: "GET",
+                url: "/Video/UploadInfo?size=" + size,
+                success: function (response) {
+                    console.log(response);
+                    let form = response.upload.form;
+                    $("#upload-form").html(form);
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+        };
+
+        let uploadFile = $("#upload-file-select");
+        uploadFile.on("change", function() {
+            let file = $(this).prop("files")[0];
+            console.log(file);
+            getUploadForm(file.size);
+        });
+    });
+    </script>
+}

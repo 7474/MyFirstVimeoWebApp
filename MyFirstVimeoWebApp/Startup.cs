@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using MyFirstVimeoWebApp.Models;
 using VimeoDotNet;
 using VimeoOpenApi.Api;
 using VimeoOpenApi.Client;
@@ -30,13 +31,20 @@ namespace MyFirstVimeoWebApp
 
 
             var vimeoAccessToken = Configuration.GetValue<string>("Vimeo:AccessToken");
+            var vimeoAppUserId = Configuration.GetValue<string>("Vimeo:AppUserId");
             services.AddScoped<IVimeoClient>(s => new VimeoClient(vimeoAccessToken));
             services.AddSingleton(s => new Configuration
             {
                 AccessToken = vimeoAccessToken,
             });
+            services.AddSingleton<IVimeoConfig>(s => new VimeoConfig
+            {
+                AppUserId = decimal.Parse(vimeoAppUserId),
+            });
             // XXX これどのコンストラクタが選択されるんだろう。明示的に指定した方が良さそう。
             services.AddSingleton<IAPIInformationEssentialsApi, APIInformationEssentialsApi>();
+            services.AddSingleton<IVideosEssentialsApi, VideosEssentialsApi>();
+            services.AddSingleton<IVideosUploadsApi, VideosUploadsApi>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
