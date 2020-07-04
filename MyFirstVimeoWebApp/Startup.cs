@@ -42,6 +42,7 @@ namespace MyFirstVimeoWebApp
             services.AddSingleton<IAPIInformationEssentialsApi, APIInformationEssentialsApi>();
             services.AddSingleton<IVideosEssentialsApi, VideosEssentialsApi>();
             services.AddSingleton<IVideosUploadsApi, VideosUploadsApi>();
+            services.AddApplicationInsightsTelemetry();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
