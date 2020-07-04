@@ -3,10 +3,16 @@
 }
 
 <div>
-    <input type="file" id="upload-file-select" />
+    <h2>MyApp Form</h2>
+    <form id="upload-form-myapp" method="post" enctype="multipart/form-data">
+        <input id="upload-file-select" type="file" name="file_data" />
+        <button id="upload-file-button" type="submit" disabled>Upload!</button>
+    </form>
 </div>
-<div id="upload-form">
-
+<div>
+    <h2>Vimemo Iframe Form</h2>
+    <div id="upload-form">
+    </div>
 </div>
 
 @section Scripts{
@@ -20,6 +26,9 @@
                     console.log(response);
                     let form = response.upload.form;
                     $("#upload-form").html(form);
+                    let uploadLink = response.upload.upload_link;
+                    $("#upload-form-myapp").attr("action", uploadLink);
+                    $("#upload-file-button").prop("disabled", false);
                 },
                 error: function (error) {
                     console.log(error);

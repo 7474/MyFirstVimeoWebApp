@@ -9,7 +9,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MyFirstVimeoWebApp.Models;
-using VimeoDotNet;
 using VimeoOpenApi.Api;
 using VimeoOpenApi.Client;
 
@@ -29,10 +28,8 @@ namespace MyFirstVimeoWebApp
         {
             services.AddControllersWithViews();
 
-
             var vimeoAccessToken = Configuration.GetValue<string>("Vimeo:AccessToken");
             var vimeoAppUserId = Configuration.GetValue<string>("Vimeo:AppUserId");
-            services.AddScoped<IVimeoClient>(s => new VimeoClient(vimeoAccessToken));
             services.AddSingleton(s => new Configuration
             {
                 AccessToken = vimeoAccessToken,

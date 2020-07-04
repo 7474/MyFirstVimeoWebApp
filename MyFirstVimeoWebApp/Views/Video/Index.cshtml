@@ -1,0 +1,13 @@
+﻿@using System.Text.Json
+@{
+    ViewData["Title"] = "VideoIndex";
+}
+
+<ul class="list-group">
+    @foreach(var video in ViewBag.Videos)
+    {
+        <li class="list-group-item"><pre class="pre-scrollable"><code>@(JsonSerializer.Serialize(video, new JsonSerializerOptions {
+                    WriteIndented = true,
+                }))</code></pre></li>
+    }
+</ul>

@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using MyFirstVimeoWebApp.Models;
-using VimeoDotNet;
 using VimeoOpenApi.Api;
 using VimeoOpenApi.Model;
 
@@ -30,8 +29,18 @@ namespace MyFirstVimeoWebApp.Controllers
             this.videosUploadsApi = videosUploadsApi;
         }
         // GET: VideoController
-        public ActionResult Index()
+        public async Task<ActionResult> IndexAsync()
         {
+            var res = await videosEssentialsApi.GetVideosAsyncWithHttpInfo(
+                vimeoConfig.AppUserId
+                );
+
+            // See. https://github.com/7474/VimeoOpenApi/issues/1
+            var json = JsonDocument.Parse(res.RawContent);
+            ViewBag.Videos = json.RootElement.EnumerateObject()
+                .First(x => x.Name == "data").Value
+                .EnumerateArray().ToList();
+
             return View();
         }
 
@@ -49,38 +58,22 @@ namespace MyFirstVimeoWebApp.Controllers
 
         public async Task<ActionResult> UploadInfoAsync([FromQuery] uint size)
         {
-            try
-            {
-                var res = await videosUploadsApi.UploadVideoAsyncWithHttpInfo(
-                    vimeoConfig.AppUserId,
-                    new InlineObject50(
-                        upload: new MeVideosUpload(
-                            approach: MeVideosUpload.ApproachEnum.Post,
-                            size: size.ToString(),
-                            // XXX さしあたって既定のVimeoのものを使う
-                            redirectUrl: ""
-                            ),
-                        license: InlineObject50.LicenseEnum.By
-                    )
-                );
+            var res = await videosUploadsApi.UploadVideoAsyncWithHttpInfo(
+                vimeoConfig.AppUserId,
+                new InlineObject50(
+                    upload: new MeVideosUpload(
+                        approach: MeVideosUpload.ApproachEnum.Post,
+                        size: size.ToString(),
+                        // XXX どこかにAllowリスト設定が必要？
+                        redirectUrl: $"https://{Request.Host}/Video"
+                        ),
+                    license: InlineObject50.LicenseEnum.By
+                )
+            );
 
-                // See. https://github.com/7474/VimeoOpenApi/issues/1
-                var json = JsonDocument.Parse(res.RawContent);
-                return Ok(json);
-
-            }
-            catch (Exception ex)
-            {
-                logger.LogWarning(ex, ex.Message);
-
-                // クオータ超えたとかの時は既存を取って置き換えにしてしのげるか？
-                // -> アップロード用の情報は返却されない
-                var res = await videosEssentialsApi.GetVideosAsyncWithHttpInfo(
-                    vimeoConfig.AppUserId
-                    );
-                var json = JsonDocument.Parse(res.RawContent);
-                return Ok(json.RootElement.EnumerateObject().First(x => x.Name == "data").Value[0]);
-            }
+            // See. https://github.com/7474/VimeoOpenApi/issues/1
+            var json = JsonDocument.Parse(res.RawContent);
+            return Ok(json.RootElement);
         }
 
         // POST: VideoController/Create
@@ -90,7 +83,7 @@ namespace MyFirstVimeoWebApp.Controllers
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(IndexAsync));
             }
             catch
             {
@@ -111,7 +104,7 @@ namespace MyFirstVimeoWebApp.Controllers
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(IndexAsync));
             }
             catch
             {
@@ -132,7 +125,7 @@ namespace MyFirstVimeoWebApp.Controllers
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(IndexAsync));
             }
             catch
             {
